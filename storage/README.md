@@ -10,6 +10,6 @@ When ready:
 4. Implement authenticated write endpoints for adding, editing and deleting pieces. Never publish a write API without identity and authorization.
 5. Process images and restrict upload size and content type; store only opaque object keys in D1.
 6. Implement a public read-only gallery **if desired**, separating public display from private studio data.
-7. Add a user-triggered import of the existing version-1 JSON backups, preserving photo and clay percentages.
+7. Add a user-triggered import of the existing version-1 JSON backups, preserving photographs, glaze layering order and any legacy clay composition data.
 
 Adding bindings alone will **not** sync or publish browser IndexedDB records. Until a backend and migration exist, the site continues to use a distinct local collection for each browser.

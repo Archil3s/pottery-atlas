@@ -13,11 +13,11 @@ CREATE TABLE IF NOT EXISTS pieces (
   updated_at TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS piece_clays (
+CREATE TABLE IF NOT EXISTS piece_glazes (
   piece_id TEXT NOT NULL REFERENCES pieces(id) ON DELETE CASCADE,
   sort_order INTEGER NOT NULL,
-  clay_name TEXT NOT NULL,
-  percentage REAL NOT NULL CHECK (percentage > 0 AND percentage <= 100),
+  glaze_name TEXT NOT NULL,
+  application TEXT NOT NULL DEFAULT '',
   PRIMARY KEY (piece_id, sort_order)
 );
 

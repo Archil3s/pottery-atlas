@@ -62,10 +62,20 @@ function potIllustration(className = "") {
   return illustration;
 }
 
+// Older v1 records may contain clay blends. Keep them separately instead
+// of silently mislabelling them as glaze recipes.
+function glazesFor(piece) {
+  return Array.isArray(piece.glazes) ? piece.glazes : [];
+}
+
+function legacyClaysFor(piece) {
+  return Array.isArray(piece.legacyClays) ? piece.legacyClays : (Array.isArray(piece.clays) ? piece.clays : []);
+}
+
 function visiblePieces() {
   const query = state.search.trim().toLocaleLowerCase();
   const items = state.pieces.filter(piece => {
-    const haystack = [piece.title, piece.purpose, piece.notes, ...piece.clays.map(c => c.name)].join(" ").toLocaleLowerCase();
+    const haystack = [piece.title, piece.purpose, piece.notes, ...glazesFor(piece).map(g => g.name + " " + g.application), ...legacyClaysFor(piece).map(c => c.name)].join(" ").toLocaleLowerCase();
     return !query || haystack.includes(query);
   });
   items.sort((a, b) => {
@@ -90,7 +100,7 @@ function render() {
   $("#emptyState").hidden = items.length > 0;
   if (!items.length) {
     $("#emptyTitle").textContent = total ? "No pieces match your search." : "Your collection begins here.";
-    $("#emptyDescription").textContent = total ? "Try another search to find a piece in your collection." : "Add your first piece to keep its clay, purpose, weight and price together.";
+    $("#emptyDescription").textContent = total ? "Try another search to find a piece in your collection." : "Add your first piece to keep its glazes, purpose, clay weight and price together.";
     $("#emptyAdd").hidden = total > 0;
   }
 
@@ -127,57 +137,48 @@ async function refresh() {
   render();
 }
 
-function makeClayRow(name = "", percentage = "") {
-  const row = element("div", "clay-row");
-  const nameField = element("input", "clay-name");
+function makeGlazeRow(name = "", application = "") {
+  const row = element("div", "glaze-row");
+  const nameField = element("input", "glaze-name");
   nameField.type = "text";
-  nameField.placeholder = "Clay name, e.g. stoneware";
+  nameField.placeholder = "e.g. Celadon";
   nameField.maxLength = 100;
   nameField.value = name;
-  nameField.required = true;
-  nameField.setAttribute("aria-label", "Clay name");
-  const percentField = element("input", "clay-percentage");
-  percentField.type = "number";
-  percentField.min = "0.1";
-  percentField.max = "100";
-  percentField.step = "0.1";
-  percentField.placeholder = "%";
-  percentField.required = true;
-  percentField.value = percentage;
-  percentField.setAttribute("aria-label", "Clay percentage");
-  const remove = element("button", "remove-clay", "Remove");
+  nameField.setAttribute("aria-label", "Glaze name");
+  const applicationField = element("input", "glaze-application");
+  applicationField.type = "text";
+  applicationField.placeholder = "e.g. over base";
+  applicationField.maxLength = 120;
+  applicationField.value = application;
+  applicationField.setAttribute("aria-label", "Where or how this glaze is applied");
+  const remove = element("button", "remove-glaze", "Remove");
   remove.type = "button";
-  remove.setAttribute("aria-label", "Remove clay from blend");
+  remove.setAttribute("aria-label", "Remove glaze from combination");
   remove.addEventListener("click", () => {
-    if ($("#clayRows").children.length === 1) {
-      announce("Each piece needs at least one clay.", true);
-      return;
+    if ($("#glazeRows").children.length === 1) {
+      nameField.value = "";
+      applicationField.value = "";
+      nameField.focus();
+    } else {
+      row.remove();
     }
-    row.remove();
-    updateBlendTotal();
   });
-  row.append(nameField, percentField, remove);
-  row.addEventListener("input", updateBlendTotal);
-  $("#clayRows").append(row);
-  updateBlendTotal();
+  row.append(nameField, applicationField, remove);
+  $("#glazeRows").append(row);
   return row;
 }
 
-function readClays() {
-  return [...$("#clayRows").children].map(row => ({
-    name: $(".clay-name", row).value.trim(),
-    percentage: Number($(".clay-percentage", row).value)
+function readGlazes() {
+  return [...$("#glazeRows").children].map(row => ({
+    name: $(".glaze-name", row).value.trim(),
+    application: $(".glaze-application", row).value.trim()
   }));
 }
 
-function updateBlendTotal() {
-  const clays = readClays();
-  const sum = clays.reduce((total, clay) => total + (Number.isFinite(clay.percentage) ? clay.percentage : 0), 0);
-  const valid = Math.abs(sum - 100) <= 0.011 && clays.every(clay => clay.name && clay.percentage > 0);
-  $("#blendTotal").textContent = formatNumber.format(sum) + "% / 100%";
-  $("#blendTotal").dataset.valid = String(valid);
-  $("#blendHint").textContent = valid ? "Your blend adds up to 100%." : "Clay percentages must add up to 100%.";
-  return valid;
+function validGlazes(glazes) {
+  // Unglazed or not-yet-glazed pieces are allowed. A filled application
+  // note must always have a glaze name.
+  return glazes.every(glaze => glaze.name || !glaze.application);
 }
 
 function setPhotoPreview(photo) {
@@ -203,7 +204,7 @@ function openEditor(id = null) {
   state.image = piece ? piece.photo : null;
   state.imageRemoved = false;
   $("#editorForm").reset();
-  $("#clayRows").replaceChildren();
+  $("#glazeRows").replaceChildren();
   $("#editorHeading").textContent = piece ? "Edit this piece" : "Add a piece";
   $("#savePiece").textContent = piece ? "Save changes" : "Add to collection";
   $("#pieceTitle").value = piece ? piece.title : "";
@@ -211,8 +212,8 @@ function openEditor(id = null) {
   $("#pieceWeight").value = piece ? piece.weightGrams : "";
   $("#piecePrice").value = piece ? piece.price : "";
   $("#pieceNotes").value = piece ? piece.notes : "";
-  const clays = piece?.clays?.length ? piece.clays : [{ name: "", percentage: 100 }];
-  clays.forEach(clay => makeClayRow(clay.name, clay.percentage));
+  const glazes = glazesFor(piece || {});
+  (glazes.length ? glazes : [{ name: "", application: "" }]).forEach(glaze => makeGlazeRow(glaze.name, glaze.application));
   setPhotoPreview(state.image);
   $("#formError").textContent = "";
   $("#editorDialog").showModal();
@@ -270,11 +271,12 @@ async function handlePhoto(event) {
 
 async function handleSave(event) {
   event.preventDefault();
-  const clays = readClays();
-  if (!updateBlendTotal()) {
-    $("#formError").textContent = "Enter each clay and adjust the proportions to total 100%.";
+  const glazeRows = readGlazes();
+  if (!validGlazes(glazeRows)) {
+    $("#formError").textContent = "Give each glaze an actual name before adding application details.";
     return;
   }
+  const glazes = glazeRows.filter(glaze => glaze.name);
   const title = $("#pieceTitle").value.trim();
   const purpose = $("#piecePurpose").value.trim();
   const weightGrams = Number($("#pieceWeight").value);
@@ -286,7 +288,8 @@ async function handleSave(event) {
   const previous = state.pieces.find(piece => piece.id === state.editingId);
   const piece = {
     id: previous?.id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()),
-    title, purpose, weightGrams, price, clays,
+    title, purpose, weightGrams, price, glazes,
+    legacyClays: previous ? legacyClaysFor(previous) : [],
     photo: state.imageRemoved ? null : state.image,
     notes: $("#pieceNotes").value.trim(),
     createdAt: previous?.createdAt || new Date().toISOString(),
@@ -335,8 +338,13 @@ function openDetail(id) {
   const details = element("dl", "detail-list");
   details.append(detailLine("Clay weight", formatNumber.format(piece.weightGrams) + " g"));
   details.append(detailLine("Asking price", formatMoney.format(piece.price)));
-  const clayDescription = piece.clays.map(clay => clay.name + " · " + formatNumber.format(clay.percentage) + "%").join(" / ");
-  details.append(detailLine("Clay blend", clayDescription));
+  const glazes = glazesFor(piece);
+  const glazeDescription = glazes.length ? glazes.map((glaze, i) => (i + 1) + ". " + glaze.name + (glaze.application ? " (" + glaze.application + ")" : "")).join(" / ") : "No glaze recorded";
+  details.append(detailLine("Glazes (in order)", glazeDescription));
+  const oldClays = legacyClaysFor(piece);
+  if (oldClays.length) {
+    details.append(detailLine("Earlier clay entry", oldClays.map(clay => clay.name + (Number.isFinite(Number(clay.percentage)) ? " · " + formatNumber.format(Number(clay.percentage)) + "%" : "")).join(" / ")));
+  }
   content.append(details);
   if (piece.notes) {
     content.append(element("h3", "detail-notes-title", "Studio notes"));
@@ -347,27 +355,46 @@ function openDetail(id) {
 }
 
 function normalizeImport(raw) {
-  if (!raw || typeof raw !== "object" || !Array.isArray(raw.pieces) || raw.version !== 1) {
-    throw new Error("This is not a Pottery Atlas version 1 backup.");
+  if (!raw || typeof raw !== "object" || !Array.isArray(raw.pieces) || ![1, 2].includes(raw.version)) {
+    throw new Error("This is not a supported Pottery Atlas backup (version 1 or 2).");
   }
   if (raw.pieces.length > 10000) throw new Error("Backup contains too many records.");
   return raw.pieces.map(piece => {
-    if (typeof piece.title !== "string" || typeof piece.purpose !== "string" || !Array.isArray(piece.clays)) {
+    if (!piece || typeof piece.title !== "string" || typeof piece.purpose !== "string") {
       throw new Error("A piece in the backup is missing required fields.");
     }
     const weightGrams = Number(piece.weightGrams);
     const price = Number(piece.price);
-    const clays = piece.clays.map(clay => ({ name: String(clay.name || "").slice(0, 100), percentage: Number(clay.percentage) }));
-    if (!(weightGrams > 0) || !(price >= 0) || !Number.isFinite(price) || !clays.length ||
-        clays.some(clay => !clay.name || !(clay.percentage > 0)) ||
-        Math.abs(clays.reduce((sum, clay) => sum + clay.percentage, 0) - 100) > 0.011) {
-      throw new Error("A piece in the backup contains invalid weight, price or clay proportions.");
+    if (!(weightGrams > 0) || !(price >= 0) || !Number.isFinite(price)) {
+      throw new Error("A piece in the backup has invalid weight or price.");
+    }
+    if (raw.version === 1 && !Array.isArray(piece.clays)) {
+      throw new Error("A version 1 piece is missing its previous clay entry.");
+    }
+    if (raw.version === 2 && !Array.isArray(piece.glazes)) {
+      throw new Error("A version 2 piece is missing its glaze list.");
+    }
+    const glazes = raw.version === 2 ? piece.glazes.map(glaze => ({
+      name: String(glaze?.name || "").trim().slice(0, 100),
+      application: String(glaze?.application || "").trim().slice(0, 120)
+    })) : [];
+    if (glazes.length > 30 || glazes.some(glaze => !glaze.name)) {
+      throw new Error("A piece in the backup contains an invalid glaze combination.");
+    }
+    // Preserve all v1 clay data separately; clay names cannot be inferred to be glazes.
+    const legacySource = raw.version === 1 ? piece.clays : (Array.isArray(piece.legacyClays) ? piece.legacyClays : []);
+    const legacyClays = legacySource.map(clay => ({
+      name: String(clay?.name || "").trim().slice(0, 100),
+      percentage: Number(clay?.percentage)
+    }));
+    if (legacyClays.length > 30 || legacyClays.some(clay => !clay.name || !(clay.percentage > 0))) {
+      throw new Error("An older clay entry in the backup is invalid.");
     }
     return {
       id: typeof piece.id === "string" && piece.id.length < 150 ? piece.id : crypto.randomUUID(),
       title: piece.title.slice(0, 160),
       purpose: piece.purpose.slice(0, 160),
-      weightGrams, price, clays,
+      weightGrams, price, glazes, legacyClays,
       notes: String(piece.notes || "").slice(0, 5000),
       photo: typeof piece.photo === "string" && /^data:image\/(jpeg|png|webp);base64,/i.test(piece.photo) ? piece.photo : null,
       createdAt: !Number.isNaN(Date.parse(piece.createdAt)) ? piece.createdAt : new Date().toISOString(),
@@ -381,7 +408,15 @@ function exportCollection() {
     announce("Add a piece before exporting a backup.", true);
     return;
   }
-  const backup = { app: "pottery-atlas", version: 1, exportedAt: new Date().toISOString(), pieces: state.pieces };
+  const backup = {
+    app: "pottery-atlas",
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    pieces: state.pieces.map(piece => {
+      const { clays: obsoleteClays, ...rest } = piece;
+      return { ...rest, glazes: glazesFor(piece), legacyClays: legacyClaysFor(piece) };
+    })
+  };
   const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -433,9 +468,9 @@ async function init() {
   $("#editorClose").addEventListener("click", closeEditor);
   $("#editorCancel").addEventListener("click", closeEditor);
   $("#editorForm").addEventListener("submit", handleSave);
-  $("#addClay").addEventListener("click", () => {
-    const row = makeClayRow("", "");
-    $(".clay-name", row).focus();
+  $("#addGlaze").addEventListener("click", () => {
+    const row = makeGlazeRow("", "");
+    $(".glaze-name", row).focus();
   });
   $("#photoInput").addEventListener("change", handlePhoto);
   $("#photoRemove").addEventListener("click", () => {

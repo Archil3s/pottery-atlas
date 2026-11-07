@@ -126,16 +126,15 @@ dialog::backdrop { background: rgba(26,31,25,.58); }
 .input-wrap { position: relative; }
 .input-wrap input { padding-right: 48px; }
 .input-suffix { position: absolute; top: 50%; right: 14px; transform: translateY(-50%); color: var(--quiet); font-size: 12px; pointer-events: none; }
-.blend-header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
-.blend-header h3 { margin: 0; }
-.blend-total { margin: 0; color: #a34435; font: 700 12px var(--sans); font-variant-numeric: tabular-nums; }
-.blend-total[data-valid="true"] { color: #376747; }
-.clay-columns { display: grid; grid-template-columns: minmax(0,1fr) 94px 64px; gap: 10px; margin-bottom: 6px; color: var(--quiet); font: 700 10px var(--sans); letter-spacing: .1em; text-transform: uppercase; }
-.clay-row { display: grid; grid-template-columns: minmax(0,1fr) 94px 64px; gap: 10px; margin: 9px 0; }
-.clay-row input { width: 100%; min-width: 0; min-height: 45px; padding: 10px 11px; border: 1px solid #cfcabe; background: #fff; border-radius: 4px; }
-.clay-row .remove-clay { padding: 0 4px; background: transparent; color: var(--accent-dark); border: 0; font-size: 11px; font-weight: 700; text-decoration: underline; }
-.blend-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; margin-top: 9px; }
-.blend-foot .field-hint { margin: 0; }
+.glaze-header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+.glaze-header h3 { margin: 0; }
+ .glaze-intro { margin: -7px 0 16px; }
+.glaze-columns { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) 64px; gap: 10px; margin-bottom: 6px; color: var(--quiet); font: 700 10px var(--sans); letter-spacing: .1em; text-transform: uppercase; }
+.glaze-row { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) 64px; gap: 10px; margin: 9px 0; }
+.glaze-row input { width: 100%; min-width: 0; min-height: 45px; padding: 10px 11px; border: 1px solid #cfcabe; background: #fff; border-radius: 4px; }
+.glaze-row .remove-glaze { padding: 0 4px; background: transparent; color: var(--accent-dark); border: 0; font-size: 11px; font-weight: 700; text-decoration: underline; }
+.glaze-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; margin-top: 9px; }
+.glaze-foot .field-hint { margin: 0; }
 .photo-row { display: grid; grid-template-columns: 155px 1fr; gap: 20px; align-items: center; }
 .photo-preview { position: relative; min-height: 164px; height: 164px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 5px; overflow: hidden; background: var(--paper-deep); border: 1px solid var(--line); }
 .photo-preview-image { width: 100%; height: 100%; object-fit: cover; }
@@ -224,9 +223,9 @@ dialog::backdrop { background: rgba(26,31,25,.58); }
   .photo-row { grid-template-columns: 120px 1fr; gap: 13px; }
   .photo-preview { min-height: 135px; height: 135px; }
   .photo-actions .button { padding-inline: 10px; }
-  .clay-columns, .clay-row { grid-template-columns: minmax(0,1fr) 75px 52px; gap: 6px; }
-  .clay-row input { padding: 9px 6px; font-size: 13px; }
-  .clay-row .remove-clay { font-size: 10px; }
+  .glaze-columns, .glaze-row { grid-template-columns: minmax(0,1fr) minmax(0,1fr) 52px; gap: 6px; }
+  .glaze-row input { padding: 9px 6px; font-size: 13px; }
+  .glaze-row .remove-glaze { font-size: 10px; }
   .detail-dialog { max-height: 96dvh; }
   .detail-body { display: block; }
   .detail-media, .detail-media img, .detail-pot { min-height: 250px; max-height: 320px; height: 280px; }
@@ -279,7 +278,7 @@ button { touch-action: manipulation; }
   .editor-form { padding-bottom: 30px; }
   .editor-footer { margin: 0 -19px -30px; padding-inline: 19px; }
   .editor-footer .button { min-height: 48px; }
-  .clay-row input { font-size: 16px; }
+  .glaze-row input { font-size: 16px; }
   .detail-actions .button { min-height: 46px; }
 }
 @media (max-width: 390px) {
@@ -294,15 +293,32 @@ button { touch-action: manipulation; }
   .hero-heading { font-size: clamp(47px, 12.5vw, 56px); letter-spacing: -.065em; }
   .stat-value { font-size: 21px; }
   .photo-row { grid-template-columns: 100px minmax(0, 1fr); }
-  .clay-columns, .clay-row { grid-template-columns: minmax(0,1fr) 73px 52px; }
+  .glaze-columns, .glaze-row { grid-template-columns: minmax(0,1fr) minmax(0,1fr) 52px; }
   .detail-line { grid-template-columns: 95px minmax(0, 1fr); }
 }
 @media (max-width: 350px) {
   .brand-sub { letter-spacing: .09em; }
   .hero-heading { font-size: 44px; }
   .stat-label { letter-spacing: .08em; }
-  .clay-columns, .clay-row { grid-template-columns: minmax(0,1fr) 68px 45px; }
+  .glaze-columns, .glaze-row { grid-template-columns: minmax(0,1fr) minmax(0,1fr) 45px; }
   .editor-form { padding-inline: 14px; }
   .editor-footer { margin-inline: -14px; padding-inline: 14px; }
-  .clay-row .remove-clay { font-size: 10px; }
+  .glaze-row .remove-glaze { font-size: 10px; }
+}
+
+/* On narrow iPhones each glaze gets full-width fields, not squeezed columns. */
+@media (max-width: 510px) {
+  .glaze-columns { display: none; }
+  .glaze-row {
+    grid-template-columns: minmax(0, 1fr) 64px;
+    grid-template-areas: "name remove" "application remove";
+    padding: 10px 0 14px;
+    border-bottom: 1px solid var(--line);
+    align-items: stretch;
+  }
+  .glaze-row .glaze-name { grid-area: name; }
+  .glaze-row .glaze-application { grid-area: application; }
+  .glaze-row .remove-glaze { grid-area: remove; }
+  .glaze-row input { min-height: 48px; font-size: 16px; padding: 11px 12px; }
+  .glaze-row .remove-glaze { font-size: 11px; min-width: 58px; }
 }

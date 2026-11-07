@@ -2,7 +2,7 @@
 
 ## Design brief
 
-An **iPhone-first ceramic studio inventory**, not a generic SaaS dashboard or ecommerce checkout. The main action is adding a piece; secondary actions are finding it and checking its clay/price. Use an unhurried, tactile editorial language associated with ceramic materials.
+An **iPhone-first ceramic studio inventory**, not a generic SaaS dashboard or ecommerce checkout. The main action is adding a piece; secondary actions are finding it and checking its glazes, clay weight and price. Use an unhurried, tactile editorial language associated with ceramic materials.
 
 ## Selected aesthetic
 
@@ -39,6 +39,6 @@ These are **references and review heuristics only**, not imported packages, copi
 
 ## Quality checks to run in a real browser
 
-Check Safari at 320/375/390/393/430 CSS px, mobile Chrome, and desktop widths. Test the form with the keyboard open, photo uploads, clay rows with long names, zoom/large text, dark-mode default, save state, search with no matches, and orientation changes.
+Check Safari at 320/375/390/393/430 CSS px, mobile Chrome, and desktop widths. Test the form with the keyboard open, photo uploads, glaze rows with long names, zoom/large text, dark-mode default, save state, search with no matches, and orientation changes.
 
 Static source review is not a substitute for a live Lighthouse/Safari audit. This release does not claim a measured performance or accessibility score.

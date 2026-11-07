@@ -7,17 +7,17 @@ A pottery studio catalogue built as an elegant, responsive static website for Cl
 For each pottery piece you can record:
 - The name and **purpose** of the piece
 - **Clay weight in grams**
-- A **blend of clays** and their percentages (must total 100%)
+- A **glaze combination** with multiple glaze names, application order and optional layer/placement notes
 - **Asking price in NZD**
 - An optional photograph and studio notes
 
-Other features: browse cards, search across names/purposes/clays, sort by newest or price, edit, delete, and see collection totals.
+Other features: browse cards, search across names/purposes/glazes, sort by newest or price, edit, delete, and see collection totals.
 
 ### Important: storage is currently device-local
 
 This release works **without Cloudflare D1 or R2**. It uses the browser's IndexedDB to store records and photos on the device where they are entered. Records are **not available to other visitors or synced across devices**. Clearing browser website data can delete them.
 
-Use **Export backup** to download a JSON file containing your records and photographs. Use **Import backup** to restore them, even on another device. The optional Cloudflare D1/R2 upgrade plan is in [storage/README.md](storage/README.md). There is no unprotected public write API.
+Version 2 backups contain glaze combinations. Version 1 backups can still be imported: old clay compositions are preserved as clearly labelled legacy data, not silently converted to glazes.\n\nUse **Export backup** to download a JSON file containing your records and photographs. Use **Import backup** to restore them, even on another device. The optional Cloudflare D1/R2 upgrade plan is in [storage/README.md](storage/README.md). There is no unprotected public write API.
 
 ## Cloudflare Workers Builds
 
@@ -51,8 +51,8 @@ Design decisions and phone testing targets are documented in [DESIGN.md](DESIGN.
 
 ## Smoke test
 
-1. Add a piece with 60% stoneware and 40% porcelain, a weight, purpose, price, and photo.
-2. Try 90% as a clay total: saving should be rejected.
+1. Add a piece with two glazes (e.g. a base coat and an overglaze), a clay weight, purpose, price, and photo.
+2. Add several glaze layers without percentages; the order is kept. An unglazed piece is also allowed.
 3. Refresh the page: the piece should persist on that browser only.
 4. Search, sort, edit, view details, and delete.
 5. Export and import JSON backup, including the photo.
