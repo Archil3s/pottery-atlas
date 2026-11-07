@@ -87,7 +87,30 @@ function visiblePieces() {
   return items;
 }
 
+function renderFeatured() {
+  // A user's own photographs become the editorial hero. Never fetch or
+  // display another ceramicist's work as though it belonged to this studio.
+  const piece = state.pieces
+    .filter(item => typeof item.photo === "string" && item.photo.startsWith("data:image/"))
+    .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")))[0];
+  const photoFrame = $("#heroImageShell");
+  const illustration = $("#heroArtwork");
+  const image = $("#heroImage");
+  photoFrame.hidden = !piece;
+  illustration.hidden = Boolean(piece);
+  if (piece) {
+    image.src = piece.photo;
+    image.alt = "Studio photograph: " + piece.title;
+    $("#heroArtCaption").textContent = piece.title;
+  } else {
+    image.removeAttribute("src");
+    image.alt = "";
+    $("#heroArtCaption").textContent = "A study in clay";
+  }
+}
+
 function render() {
+  renderFeatured();
   const total = state.pieces.length;
   $("#statPieces").textContent = formatNumber.format(total);
   $("#statWeight").textContent = total ? formatNumber.format(state.pieces.reduce((sum, piece) => sum + piece.weightGrams, 0) / 1000) + " kg" : "—";
@@ -126,6 +149,11 @@ function render() {
     base.append(element("span", "piece-card-weight", formatNumber.format(piece.weightGrams) + " g of clay"));
     base.append(element("span", "piece-card-price", formatMoney.format(piece.price)));
     body.append(eyebrow, title, base);
+    const glazes = glazesFor(piece);
+    if (glazes.length) {
+      const glazeInfo = element("span", "piece-card-glazes", glazes.map(glaze => glaze.name).join(" / "));
+      body.append(glazeInfo);
+    }
     card.append(media, body);
     card.addEventListener("click", () => openDetail(piece.id));
     grid.append(card);

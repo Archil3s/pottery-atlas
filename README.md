@@ -1,10 +1,10 @@
 # Pottery Atlas
 
-A pottery studio catalogue built as an elegant, responsive static website for Cloudflare Workers.
+A photograph-led, iPhone-first pottery studio catalogue built as a responsive static website for Cloudflare Workers. Its original gallery styling is informed by ceramicists Dan Mack and Florian Gadsby (see [DESIGN.md](DESIGN.md)), without reusing their photographs or branding.
 
 ## The catalogue
 
-For each pottery piece you can record:
+The homepage features the most recently recorded piece with a photograph; otherwise an original ceramic illustration appears. For each pottery piece you can record:
 - The name and **purpose** of the piece
 - **Clay weight in grams**
 - A **glaze combination** with multiple glaze names, application order and optional layer/placement notes

@@ -1,44 +1,61 @@
-# Pottery Atlas visual direction
+# Pottery Atlas: Studio Gallery Design
 
-## Design brief
+## Direction
 
-An **iPhone-first ceramic studio inventory**, not a generic SaaS dashboard or ecommerce checkout. The main action is adding a piece; secondary actions are finding it and checking its glazes, clay weight and price. Use an unhurried, tactile editorial language associated with ceramic materials.
+**A quiet, photographic archive for a working potter.** The site should feel like a ceramicist's own portfolio, not a SaaS dashboard, a stock template, or an invented ecommerce shop.
 
-## Selected aesthetic
+This is an original design informed by visual research into two practicing ceramicists' websites. It must not reproduce their site templates, branding, text, photographs, or product images.
 
-**Studio ledger / ceramic editorial**
+## Source study (8 November 2026)
 
-- Warm paper (`#f7f4ed`), clay brown (`#91573c`), forest ink (`#344b3d`).
-- A humanist display serif (Fraunces) combined with plain readable DM Sans; system fallbacks.
-- An original inline SVG pottery still life rather than stock photos, false reviews, busy gradients, abstract orb decoration, or canned marketing numbers.
-- Simple dividers, actual item photography, open white space and a clear hierarchy.
-- Real records instead of fake demo product cards. An empty catalogue invites the first piece.
+- [Dan Mack Studio](https://www.danmackstudio.com/) and [Gallery](https://www.danmackstudio.com/lookbook3): warm studio photography, close attention to ceramic surfaces, earthy tones, and an understated presentation where form is the centre of attention.
+- [Florian Gadsby](https://www.floriangadsby.com/) and [Gallery](https://www.floriangadsby.com/gallery): light, calm backgrounds; unobtrusive interfaces; large deliberate compositions; consistently labelled pieces and detailed descriptions of glazing and techniques.
 
-## iPhone priorities
+The influence is **editorial restraint, photography and pacing**, not literal copying. A previous illustrative hero has been replaced with a quieter studio composition that automatically gives way to the potter's own most recent photograph.
 
-- Target the real widths of smaller iPhones (320/375 px), current 390/393 px screens and larger 430 px displays.
-- The catalogue becomes one column at 510 px and below so pieces are not squeezed into tiny cards.
-- Header offers an immediate **Add a piece** action without a hamburger menu.
-- Forms use 16 px input text, which prevents Safari from automatically zooming the viewport when the keyboard opens.
-- Native HTML `<dialog>` for editing and piece details, with touch targets at least ~44 px for primary controls.
-- Viewport-fit cover and `env(safe-area-inset-*)` protect controls from the Dynamic Island/notch and home indicator.
-- The editor scrolls vertically within `100dvh`, with a sticky save area above the lower safe area.
-- Prefer SVG and static layout rather than an animation-heavy hero.
-- Support reduced motion, keyboard navigation, semantics, visible focus rings and useful input labels.
-- Image uploads use the native iPhone photo picker where supported, then resize client-side.
+## Visual system
 
-## Design-system reference GitHub repositories
+- Background `#f9f8f5` (gallery paper); ink `#222220`; restrained warm-grey and natural clay neutrals.
+- Low-contrast divider lines, no rounded dashboard cards, gradients, fake statistics, manufactured social proof, or sample photos that could be confused with a user's work.
+- Type is mostly precise sans serif (DM Sans). Newsreader is used sparingly for the empty state and editorial text accents.
+- A clean **POTTERY / ATLAS** wordmark, small archive subtitle and straightforward **New piece** action.
+- Large photography with consistent crops. On the homepage, the latest photographed piece is featured. Without photos, a restrained original SVG vessel appears instead.
+- The collection becomes the visual centre: large piece photos, name, purpose, clay weight, glaze names and asking price, separated by white space instead of boxed cards.
+- Practical editor sheet remains explicit and accessible; its style is quieter but its workflow is not hidden by aesthetics.
 
-These are **references and review heuristics only**, not imported packages, copied code or vendor artwork:
+## iPhone-first behaviour
 
-1. [Studio Groei / anti-slop](https://github.com/Studio-Groei/anti-slop) — reject predictable AI-generated templates and generic copy.
-2. [Anthropic / frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) — derive visual decisions from the craft rather than default SaaS patterns.
-3. [Paul Bakaus / impeccable](https://github.com/pbakaus/impeccable) — shape, critique, polish, harden and check responsive behavior.
-4. [nextlevelbuilder / ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) — consistent interaction patterns, accessibility and type/spacing systems.
-5. [Addy Osmani / web-quality-skills](https://github.com/addyosmani/web-quality-skills) — measurable accessibility, web performance and Core Web Vitals checks.
+- At 510 CSS px and below, the catalogue becomes a single-column photo gallery. Images remain large enough to appreciate textures and glazes.
+- Test 320, 375, 390, 393, 402 and 430 px widths; ensure 44 px+ minimum key touch targets and no horizontal scrolling.
+- The header offers the one important action without a hamburger menu. The hero copy precedes the photograph on mobile.
+- Form inputs use 16 px text to avoid iOS Safari focus zoom. A `100dvh` scrolling editor and sticky action bar respect `env(safe-area-inset-bottom)`.
+- Each glaze row stacks into two full-width input fields on phones, leaving the glaze name and application order legible with the keyboard open.
+- Keyboard focus rings, descriptive labels, `prefers-reduced-motion`, semantic article structure, native photo picking and client-side image resizing remain intact.
 
-## Quality checks to run in a real browser
+## Catalogue behaviour and storage
 
-Check Safari at 320/375/390/393/430 CSS px, mobile Chrome, and desktop widths. Test the form with the keyboard open, photo uploads, glaze rows with long names, zoom/large text, dark-mode default, save state, search with no matches, and orientation changes.
+No schema migration is needed for the design change. The existing IndexedDB name remains `pottery-atlas-local-v1`, preserving records across deployments in the same browser and origin. This is **not cloud synchronisation**.
 
-Static source review is not a substitute for a live Lighthouse/Safari audit. This release does not claim a measured performance or accessibility score.
+- Records: name, purpose, starting clay weight, asking price (NZD), glaze names in application order, optional placement notes, optional photo, studio notes.
+- Legacy clay combinations are stored separately and never relabelled as glazes.
+- Export/import supports version 2 JSON backups and older version 1 backups.
+- Cloudflare D1 and R2 are not required for this release. See `storage/README.md`.
+
+## Antislop / engineering reference checklist
+
+- [Studio Groei / anti-slop](https://github.com/Studio-Groei/anti-slop) — use real editorial identity, avoid generic SaaS UI patterns.
+- [Anthropic / frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) — derive design from the ceramic medium.
+- [Paul Bakaus / Impeccable](https://github.com/pbakaus/impeccable) — audit and refine responsive details and interactions.
+- [nextlevelbuilder / ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) — predictable interaction states and touch controls.
+- [Addy Osmani / web-quality-skills](https://github.com/addyosmani/web-quality-skills) — browser-based accessibility and performance measurements.
+
+## Final browser verification checklist
+
+1. Add an unglazed item and a multi-glaze item, save and reload.
+2. Add a real photograph. The featured home image should switch to that photo while other pieces display their own images.
+3. Edit, search, sort, delete and export/import without data loss.
+4. Test mobile Safari at 320, 375, 390 and 430 px in portrait and landscape; repeat with the on-screen keyboard visible.
+5. Run Lighthouse/axe audits and check with VoiceOver, reduced motion and 200% text zoom.
+6. Confirm Cloudflare Worker serves `/` from `./public` and uses the correct repository root.
+
+These are validation targets; no live browser score or iOS Safari test is claimed unless actually run.
